@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunding.answer.mapper.UserMapper">
+
+    <!-- 通过手机号查询用户信息,登陆2 ，忘记密码，修改密码-->
+    <select id="selectByPhone"  resultType="com.yunding.answer.entity.User">
+        select *  from answer_system.user
+        where user_phone = #{phone}
+    </select>
+    
+</mapper>
