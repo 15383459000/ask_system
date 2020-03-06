@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunding.answer.mapper.AskingMapper">
+
+    <!--查询题库-->
+    <select id="getQuestionLib" resultType="com.yunding.answer.dto.QuestionLibDto">
+        select library_id,library_name,library_rank from question_library
+    </select>
+
+
+</mapper>

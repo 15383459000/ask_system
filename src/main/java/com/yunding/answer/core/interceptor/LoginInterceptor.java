@@ -6,7 +6,6 @@ import com.yunding.answer.common.util.ThreadLocalMap;
 import com.yunding.answer.constant.AnswerConstant;
 import com.yunding.answer.dto.TokenInfo;
 import com.yunding.answer.dto.UserInfoDto;
-import com.yunding.answer.entity.User;
 import com.yunding.answer.service.TokenService;
 import com.yunding.answer.core.wrapper.ResultWrapper;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,6 @@
 package com.yunding.answer.service.impl;
 
 import com.yunding.answer.dto.TokenInfo;
-import com.yunding.answer.entity.User;
-import com.yunding.answer.mapper.UserMapper;
 import com.yunding.answer.redis.RedisRepository;
 import com.yunding.answer.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;

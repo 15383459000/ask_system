@@ -28,8 +28,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/swagger-ui.html",
                         "/user/register",
                         "/user/login/**",
+                        "/file/image",
                         "/message/**",
-                        "/user/password/login"
+                        "/user/password/login",
+                        "/asking/**"
                 );
     }
 
