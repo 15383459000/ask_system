@@ -2,15 +2,18 @@ package com.yunding.answer.dto;
 
 import lombok.Data;
 
-
 /**
  * @Author ycSong
- * @create 2020/3/5 15:04
+ * @create 2020/3/8 19:40
  */
 @Data
-public class QuestionLibDto {
+public class AnswerRecordDto {
 
-    private String libraryId;
+    private String userId;
+
+    private String usedTime;
+
+    private String accuracy;
 
     private String libraryName;
 
@@ -19,4 +22,6 @@ public class QuestionLibDto {
     private String image;
 
     private String introduction;
+
+
 }

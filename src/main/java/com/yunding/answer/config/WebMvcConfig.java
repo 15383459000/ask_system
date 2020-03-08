@@ -31,7 +31,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/file/image",
                         "/message/**",
                         "/user/password/login",
-                        "/asking/**"
+                        "/asking/questionLib"
                 );
     }
 

@@ -2,10 +2,81 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yunding.answer.mapper.AskingMapper">
 
-    <!--查询题库-->
+    <!--查询所有题库-->
     <select id="getQuestionLib" resultType="com.yunding.answer.dto.QuestionLibDto">
-        select library_id,library_name,library_rank from question_library
+        select library_id,library_name,library_rank,image,introduction from question_library
     </select>
+
+    <!--查询题库的所有题-->
+    <select id="getQuestionsFromLib" parameterType="com.yunding.answer.form.LibIdForm" resultType="string">
+        select question_id from question_form_library where library_id = #{libId}
+    </select>
+
+    <!--通过题目id集合获取题目信息-->
+    <select id="getQuestionsInfo" parameterType="arraylist" resultType="com.yunding.answer.dto.AskingQuestionDto">
+        select question_id,type_info,question_content,checkA,checkB,checkC,checkD,tag_info
+        from questions_info,question_type,question_tag
+        where questions_info.question_tag_id = question_tag.question_tag_id
+              and questions_info.question_type_id = question_type.question_type_id
+              and (
+              <foreach collection="list" item="item" index="index" separator=" or ">
+                  question_id = #{item}
+              </foreach>
+              )
+              order by questions_info.question_type_id
+    </select>
+
+    <!--通过题目id集合获取答案-->
+    <select id="getAnswerById" parameterType="string" resultType="string">
+        select questions_info.answer,type_info from questions_info,question_type where
+        questions_info.question_type_id = question_type.question_type_id and
+
+            question_id = #{item}
+
+    </select>
+
+    <!--插入答题记录-->
+    <insert id="insertAskingRecord" parameterType="com.yunding.answer.form.AnswerRecordForm">
+        insert into answer_record( user_id, used_time, accuracy, library_id)
+                    values(#{userId},#{usedTime},#{accuracy},#{libraryId})
+    </insert>
+
+    <!--查询该用户最新的记录id-->
+    <select id="getNewRecordId" parameterType="string" resultType="string">
+        select answer_record.answer_id from answer_record where user_id=#{userId} order by createAt desc limit 1
+    </select>
+
+    <!--插入答题记录详情-->
+    <insert id="insertAskingRecordInfo" >
+        insert into answer_record_info(answer_id, question_id, is_true, user_answer)
+                    values
+                    <foreach collection="answerRecordForms" item="item" index="index" separator=",">
+                        (#{param2},#{item.questionId},#{item.isTrue},#{item.userAnswer})
+                    </foreach>
+    </insert>
+
+    <!--查询每日做题时间以及总做题量-->
+    <select id="getDailyTimeAndTotalAskNum" parameterType="string" resultType="com.yunding.answer.dto.DailyTimeAndTotalAskNumDto">
+        select learning_plan.daily_study_time,user_info.total_exercises_quantity
+               from ask_system.learning_plan,ask_system.user_info
+               where user_info.user_id = #{userId} and learning_plan.user_id = #{userId}
+    </select>
+
+    <!--更新查询每日做题时间-->
+    <update id="updateDailyTime" parameterType="string" >
+        update learning_plan set daily_study_time = #{param2}
+        where user_id = #{param1}
+    </update>
+
+    <!--更新总做题量-->
+    <update id="updateTotalAskNum" parameterType="string">
+        update user_info set total_exercises_quantity = #{param2}
+        where user_id = #{param1}
+    </update>
+    
+    
+
+
 
 
 </mapper>

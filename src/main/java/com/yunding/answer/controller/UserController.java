@@ -18,28 +18,10 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/user")
 public class UserController extends BaseController<UserInfoDto> {
-//
-//    @Autowired
-//    private UserService userService;
-//
-//
-//    @ApiOperation(value = "用户验证码登录")
-//    @PutMapping("/login/password")
-//    public ResultWrapper loginPassword(@Valid @RequestBody UserLoginPhoneForm userLoginForm, BindingResult bindingResult) {
-//
-//        /**
-//         * 参数验证
-//         */
-//        validateParams(bindingResult);
-//        User user = new User ();
-//        TokenInfo tokenInfo = null;
-//        try {
-//            tokenInfo = userService.login(userLoginForm.getPhone(), userLoginForm.getCode());
-//        } catch (SysException e) {
-//            System.out.println(e.toString());
-//            return ResultWrapper.failure(e.getMessage());
-//        }
-//        return ResultWrapper.successWithData(tokenInfo+"userRole:"+user.getUserRole ());
-//    }
+
+
+    public void login(){
+
+    }
 
 }
