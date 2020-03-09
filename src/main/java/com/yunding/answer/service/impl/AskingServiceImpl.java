@@ -3,11 +3,9 @@ package com.yunding.answer.service.impl;
 import com.yunding.answer.core.exception.SysException;
 import com.yunding.answer.dto.AskingQuestionDto;
 import com.yunding.answer.dto.DailyTimeAndTotalAskNumDto;
+import com.yunding.answer.dto.QidAndWrongTimeDto;
 import com.yunding.answer.dto.QuestionLibDto;
-import com.yunding.answer.form.AnswerForm;
-import com.yunding.answer.form.AnswerRecordForm;
-import com.yunding.answer.form.AnswerRecordInfoForm;
-import com.yunding.answer.form.LibIdForm;
+import com.yunding.answer.form.*;
 import com.yunding.answer.mapper.AskingMapper;
 import com.yunding.answer.service.AskingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +77,8 @@ public class AskingServiceImpl implements AskingService {
 
         //正确题数
         int numOfRight = 0;
+        //错题id集合
+        List<WrongQuestionForm> wrongQidAndAnswers = new ArrayList<>();
         //建立答题记录详情表单集合
         List<AnswerRecordInfoForm> answerRecordInfoForms =
                 new ArrayList<>();
@@ -92,6 +92,10 @@ public class AskingServiceImpl implements AskingService {
                    ||questionAnswer.equals(answerForm.getUserAnswerList().get(i))){
                 isTrue = true;
                 numOfRight++;
+            } else {
+                //如果错误，添加到错题集合
+                wrongQidAndAnswers.add(new WrongQuestionForm(answerForm.getUserAnswerList().get(i),
+                        answerForm.getUserAnswerList().get(i)));
             }
             //根据获取的信息去填充答题记录详情表单集合
             answerRecordInfoForms.add(
@@ -121,6 +125,41 @@ public class AskingServiceImpl implements AskingService {
                 String.valueOf(dailyTimeAndTotalAskNumDto.getDailyStudyTime()));
         askingMapper.updateTotalAskNum(userId,
                 String.valueOf(dailyTimeAndTotalAskNumDto.getTotalExercisesQuantity()));
+        //创建错题的次数和id集合
+        List<QidAndWrongTimeDto> qidAndWrongTimeDtos = askingMapper.getQidAndWrongTime(userId);
+        //查找是否已经错过，已经错过的更新字段，没有的插入
+        for (int i = 0;i<wrongQidAndAnswers.size();i++) {
+            boolean isExist = false;
+            for (int t = 0;t<qidAndWrongTimeDtos.size();t++){
+                //如果错题集中已经存在该题更新字段
+                if (wrongQidAndAnswers.get(i).getQuestionId().equals(
+                        qidAndWrongTimeDtos.get(t).getQuestionId())
+                ){
+                    askingMapper.updateWrongTime(qidAndWrongTimeDtos.get(t).getWrongTime(),
+                            qidAndWrongTimeDtos.get(t).getQuestionId(),userId);
+                    isExist = true;
+                }
+            }
+            if (!isExist){
+                askingMapper.insertWrongQuestionsRecord(wrongQidAndAnswers.get(i),
+                        userId,answerForm.getLibraryId());
+            }
+        }
+
+//        for (int i = 0;i<qidAndWrongTimeDtos.size()){
+//            boolean isExist = false;
+//            for (WrongQuestionForm i2:wrongQidAndAnswers){
+//                if (i1.getQuestionId().equals(i2.getQuestionId())){
+//                    isExist = true;
+//                    askingMapper.insertWrongQuestionsRecord(i2,userId,
+//                            answerForm.getLibraryId());
+//                }
+//            }
+//            if (isExist = true){
+//                askingMapper.updateWrongTime
+//                        (i1.getWrongTime(),i1.getQuestionId(),userId);
+//            }
+//        }
         //返回新生成的记录id
         return newRecordId;
     }

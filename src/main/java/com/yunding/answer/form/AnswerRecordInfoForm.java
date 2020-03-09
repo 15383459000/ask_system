@@ -10,7 +10,6 @@ import org.apache.catalina.User;
 @Data
 public class AnswerRecordInfoForm {
 
-    private String newRecordId;
 
     private String questionId;
 

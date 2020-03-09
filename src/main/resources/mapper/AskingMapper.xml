@@ -49,10 +49,21 @@
     <!--插入答题记录详情-->
     <insert id="insertAskingRecordInfo" >
         insert into answer_record_info(answer_id, question_id, is_true, user_answer)
-                    values
+                    value
                     <foreach collection="answerRecordForms" item="item" index="index" separator=",">
                         (#{param2},#{item.questionId},#{item.isTrue},#{item.userAnswer})
                     </foreach>
+    </insert>
+
+    <!--查找错题集中的题目id和错误次数-->
+    <select id="getQidAndWrongTime" parameterType="string" resultType="com.yunding.answer.dto.QidAndWrongTimeDto">
+        select wrong_questions_record.question_id,wrong_time from wrong_questions_record where user_id = #{userId}
+    </select>
+
+    <insert id="insertWrongQuestionsRecord">
+        insert into wrong_questions_record(question_id,user_answer, user_id, library_id)
+                    value
+                    (#{param1.questionId},#{param1.userAnswer},#{param2},#{param3})
     </insert>
 
     <!--查询每日做题时间以及总做题量-->
@@ -61,6 +72,7 @@
                from ask_system.learning_plan,ask_system.user_info
                where user_info.user_id = #{userId} and learning_plan.user_id = #{userId}
     </select>
+
 
     <!--更新查询每日做题时间-->
     <update id="updateDailyTime" parameterType="string" >
@@ -72,6 +84,12 @@
     <update id="updateTotalAskNum" parameterType="string">
         update user_info set total_exercises_quantity = #{param2}
         where user_id = #{param1}
+    </update>
+
+    <!--更新错误次数-->
+    <update id="updateWrongTime" parameterType="string">
+        update wrong_questions_record set wrong_time = (#{param1}+1)
+        where question_id = #{param2} and user_id = #{param3}
     </update>
     
     

@@ -59,8 +59,6 @@ public class AskingController extends BaseController<UserInfoDto> {
     public ResultWrapper judgePaper(@RequestBody AnswerForm answerForm){
 
 //        try {
-
-
             return ResultWrapper.successWithData(askingService.judgePaper(answerForm,getCurrentUserInfo().getUserId()));
 //        }catch (Exception e){
 //            return ResultWrapper.failure(e.toString());
