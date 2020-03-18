@@ -1,5 +1,6 @@
 package com.yunding.answer.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 /**
@@ -9,7 +10,7 @@ import lombok.Data;
 @Data
 public class AnswerRecordDto {
 
-    private String userId;
+    private String answerId;
 
     private String usedTime;
 
@@ -22,6 +23,8 @@ public class AnswerRecordDto {
     private String image;
 
     private String introduction;
+
+    private String createAt;
 
 
 }

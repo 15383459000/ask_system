@@ -12,6 +12,16 @@
         select question_id from question_form_library where library_id = #{libId}
     </select>
 
+    <!--查询题库的所有选择填空判断题-->
+    <select id="getNorQuesFromLib" parameterType="com.yunding.answer.form.LibIdForm" resultType="string">
+        select question_form_library.question_id from question_form_library,questions_info where library_id = #{libId}
+        and questions_info.question_id = question_form_library.question_id
+        and (question_type_id = 1
+             or question_type_id = 2
+             or question_type_id = 3
+             )
+    </select>
+
     <!--通过题目id集合获取题目信息-->
     <select id="getQuestionsInfo" parameterType="arraylist" resultType="com.yunding.answer.dto.AskingQuestionDto">
         select question_id,type_info,question_content,checkA,checkB,checkC,checkD,tag_info
@@ -26,19 +36,31 @@
               order by questions_info.question_type_id
     </select>
 
-    <!--通过题目id集合获取答案-->
+    <!--通过题目id获取题目信息-->
+    <select id="getQuestionInfo" parameterType="string" resultType="com.yunding.answer.dto.AskingQuestionDto">
+        select question_id,type_info,question_content,checkA,checkB,checkC,checkD,tag_info
+        from questions_info,question_type,question_tag
+        where questions_info.question_tag_id = question_tag.question_tag_id
+              and questions_info.question_type_id = question_type.question_type_id
+              and (questions_info.question_type_id = 1
+                   or questions_info.question_type_id = 2
+                   or questions_info.question_type_id = 3)
+              and question_id = #{qid}
+    </select>
+
+    <!--通过题目id获取答案-->
     <select id="getAnswerById" parameterType="string" resultType="string">
         select questions_info.answer,type_info from questions_info,question_type where
         questions_info.question_type_id = question_type.question_type_id and
 
-            question_id = #{item}
+            question_id = #{qid}
 
     </select>
 
     <!--插入答题记录-->
     <insert id="insertAskingRecord" parameterType="com.yunding.answer.form.AnswerRecordForm">
-        insert into answer_record( user_id, used_time, accuracy, library_id)
-                    values(#{userId},#{usedTime},#{accuracy},#{libraryId})
+        insert into answer_record( user_id, used_time, accuracy, library_id,createAt)
+                    values(#{userId},#{usedTime},#{accuracy},#{libraryId},unix_timestamp())
     </insert>
 
     <!--查询该用户最新的记录id-->
@@ -66,11 +88,16 @@
                     (#{param1.questionId},#{param1.userAnswer},#{param2},#{param3})
     </insert>
 
-    <!--查询每日做题时间以及总做题量-->
-    <select id="getDailyTimeAndTotalAskNum" parameterType="string" resultType="com.yunding.answer.dto.DailyTimeAndTotalAskNumDto">
-        select learning_plan.daily_study_time,user_info.total_exercises_quantity
-               from ask_system.learning_plan,ask_system.user_info
-               where user_info.user_id = #{userId} and learning_plan.user_id = #{userId}
+
+    <!--查询每日做题时间-->
+    <select id="getDailyTime" parameterType="string" resultType="integer">
+        select learning_plan.daily_study_time from learning_plan where learning_plan.user_id = #{userId}
+    </select>
+
+    <!--查询总做题量-->
+    <select id="getTotalAskNum" parameterType="string" resultType="integer">
+        select user_info.total_exercises_quantity
+               from user_info where user_info.user_id = #{userId}
     </select>
 
 
@@ -91,10 +118,53 @@
         update wrong_questions_record set wrong_time = (#{param1}+1)
         where question_id = #{param2} and user_id = #{param3}
     </update>
-    
-    
 
+    <!--获取闯关数-->
+    <select id="getStageNum" parameterType="string" resultType="string">
+        select stage_record.stage_num from stage_record where user_id
+        = #{userId}
+    </select>
 
+    <!--更新闯关数-->
+    <update id="updateStageNum" parameterType="string">
+        update stage_record set stage_num = (#{param2}+1) 
+        where user_id = #{param1}
+    </update>
 
+    <!--插入闯关数-->
+    <insert id="insertStageNum" parameterType="string">
+        insert into stage_record(stage_num, user_id) value
+        (1,#{userId})
+    </insert>
+
+    <!--获取答案和解析-->
+    <select id="getAnswerAndAnalysis" parameterType="string" resultType="com.yunding.answer.dto.AnswAndAnalyDto">
+        select questions_info.answer,questions_info.analysis from questions_info
+        where question_id = #{qid}
+    </select>
+
+    <!--通过时间获取答题记录-->
+    <select id="getAnswerRecord" resultType="com.yunding.answer.dto.AnswerRecordDto">
+        select FROM_UNIXTIME(answer_record.createAt,'%Y-%m-%d %H:%i:%S') as createAt,
+        answer_id,used_time,accuracy,question_library.library_name,introduction,image,library_rank
+        from answer_record,question_library
+        where answer_record.library_id = question_library.library_id
+        and user_id = #{param3}
+        and answer_record.createAt &lt; #{param2}
+        and answer_record.createAt &gt; #{param1}
+        order by answer_record.createAt desc
+    </select>
+
+    <!--获取获取答题记录详情-->
+    <select id="getAnswRecoInfo" parameterType="string" resultType="com.yunding.answer.dto.AnswerRecordInfoDto">
+        select questions_info.question_id,type_info,question_content,
+               checkA,checkB,checkC,checkD,tag_info,user_answer,is_true
+        from questions_info,question_tag,question_type,answer_record_info
+        where answer_id = #{answerId}
+              and questions_info.question_id = answer_record_info.question_id
+              and question_tag.question_tag_id = questions_info.question_tag_id
+              and question_type.question_type_id = questions_info.question_type_id
+        order by question_type.question_type_id
+    </select>
 
 </mapper>

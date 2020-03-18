@@ -1,10 +1,7 @@
 package com.yunding.answer.service.impl;
 
 import com.yunding.answer.core.exception.SysException;
-import com.yunding.answer.dto.AskingQuestionDto;
-import com.yunding.answer.dto.DailyTimeAndTotalAskNumDto;
-import com.yunding.answer.dto.QidAndWrongTimeDto;
-import com.yunding.answer.dto.QuestionLibDto;
+import com.yunding.answer.dto.*;
 import com.yunding.answer.form.*;
 import com.yunding.answer.mapper.AskingMapper;
 import com.yunding.answer.service.AskingService;
@@ -44,15 +41,14 @@ public class AskingServiceImpl implements AskingService {
             throw new SysException("该题集题目不超过10个");
         }
         //随机出10个数字
-        tempIds.add(String.valueOf(System.currentTimeMillis()%qids.size()));
         for (int i1 = 0 ; i1<10;i1++){
             //检验该数是否出现过了
-            String t;
+            int t;
             while (true) {
-                t = String.valueOf(System.currentTimeMillis() % qids.size());
+                t = (int) (Math.abs(System.currentTimeMillis() % qids.size()));
                 int i3 = 0;
                 for ( ;i3<tempIds.size();i3++){
-                    if (tempIds.get(i3).equals(t)){
+                    if (tempIds.get(i3).equals(qids.get(t))){
                         break;
                     }
                 }
@@ -62,12 +58,30 @@ public class AskingServiceImpl implements AskingService {
                 }
             }
             //将随机数添加进去
-            tempIds.add(t);
-
+            tempIds.add(qids.get(t));
 
         }
 
         return askingMapper.getQuestionsInfo(tempIds);
+    }
+
+    /**
+     * 开始闯关
+     * @param libIdForm
+     * @return
+     */
+    public AskingQuestionDto starStage(LibIdForm libIdForm){
+        //获取题集包含题目
+        List<String> qids = askingMapper.getNorQuesFromLib(libIdForm);
+        //检查该题库题目是否超过1个
+        if (qids.size()<1){
+            throw new SysException("该题集不能闯关");
+        }
+        //随机出一个题号
+        int t = (int)(Math.abs(System.currentTimeMillis() % qids.size()));
+        System.out.println();
+        return askingMapper.getQuestionInfo(qids.get(t));
+
     }
 
     //进行事务管理
@@ -113,18 +127,18 @@ public class AskingServiceImpl implements AskingService {
         String newRecordId = askingMapper.getNewRecordId(userId);
         //插入答题记录详情
         askingMapper.insertAskingRecordInfo(answerRecordInfoForms,newRecordId);
-        //获取总做题量和每日学习时间
-        DailyTimeAndTotalAskNumDto dailyTimeAndTotalAskNumDto =
-                askingMapper.getDailyTimeAndTotalAskNum(userId);
-        //改写获取的做题量与每日学习时间
-        dailyTimeAndTotalAskNumDto.setTotalExercisesQuantity(dailyTimeAndTotalAskNumDto.getTotalExercisesQuantity()+10);
-        dailyTimeAndTotalAskNumDto.setDailyStudyTime(dailyTimeAndTotalAskNumDto.getDailyStudyTime()
-                +Integer.valueOf(answerForm.getUsedTime()));
+        //获取总做题量
+        Integer totalExiceNum = askingMapper.getTotalAskNum(userId);
+        //每日学习时间
+        Integer dailyTime = askingMapper.getDailyTime(userId);
         //更新每日做题时间以及总做题量
-        askingMapper.updateDailyTime(userId,
-                String.valueOf(dailyTimeAndTotalAskNumDto.getDailyStudyTime()));
+        //如果每日做题时间为空跳过
+        if (dailyTime!=null) {
+            askingMapper.updateDailyTime(userId,
+                    String.valueOf(dailyTime + Integer.parseInt(answerForm.getUsedTime())));
+        }
         askingMapper.updateTotalAskNum(userId,
-                String.valueOf(dailyTimeAndTotalAskNumDto.getTotalExercisesQuantity()));
+                String.valueOf(totalExiceNum+10));
         //创建错题的次数和id集合
         List<QidAndWrongTimeDto> qidAndWrongTimeDtos = askingMapper.getQidAndWrongTime(userId);
         //查找是否已经错过，已经错过的更新字段，没有的插入
@@ -146,21 +160,50 @@ public class AskingServiceImpl implements AskingService {
             }
         }
 
-//        for (int i = 0;i<qidAndWrongTimeDtos.size()){
-//            boolean isExist = false;
-//            for (WrongQuestionForm i2:wrongQidAndAnswers){
-//                if (i1.getQuestionId().equals(i2.getQuestionId())){
-//                    isExist = true;
-//                    askingMapper.insertWrongQuestionsRecord(i2,userId,
-//                            answerForm.getLibraryId());
-//                }
-//            }
-//            if (isExist = true){
-//                askingMapper.updateWrongTime
-//                        (i1.getWrongTime(),i1.getQuestionId(),userId);
-//            }
-//        }
         //返回新生成的记录id
         return newRecordId;
     }
+
+    /**
+     * 闯关判卷
+     * @param stageAnswerForm
+     * @param userId
+     * @return
+     */
+    public boolean judgeStage(StageAnswerForm stageAnswerForm,String userId){
+        //获取题目答案
+        String answer =  askingMapper.getAnswerById(stageAnswerForm.getQuestionId());
+        //判断是否对
+        if (answer.equals(stageAnswerForm.getUserAnswer())){
+            String stageNum = askingMapper.getStageNum(userId);
+            if (stageNum==null){
+                askingMapper.insertStageNum(userId);
+            }else {
+                askingMapper.updateStageNum(userId,stageNum);
+            }
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    @Override
+    public AnswAndAnalyDto getAnswAndAna(String questionId) {
+        return askingMapper.getAnswerAndAnalysis(questionId);
+    }
+
+    @Override
+    public List<AnswerRecordDto> getAnswerRecord(RecordByTimeForm recordByTimeForm,String userId) {
+        //通过时间段获取答题记录
+        return askingMapper.getAnswerRecord(
+                Long.valueOf(recordByTimeForm.getStartTime()),Long.valueOf(recordByTimeForm.getStopTime())
+                ,userId);
+    }
+
+    @Override
+    public List<AnswerRecordInfoDto> getAnswRecorInfo(String answerId) {
+        return askingMapper.getAnswRecoInfo(answerId);
+    }
+
+
 }

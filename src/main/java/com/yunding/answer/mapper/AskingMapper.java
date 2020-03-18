@@ -23,10 +23,17 @@ public interface AskingMapper {
     List<QuestionLibDto> getQuestionLib();
 
     /**
-     * 拿出题库中的题
+     * 拿出题库中的题id
      * @return
      */
     List<String> getQuestionsFromLib(LibIdForm libIdForm);
+
+    /**
+     * 拿出题库中的非问答题选择判断填空题id
+     * @param libIdForm
+     * @return
+     */
+    List<String> getNorQuesFromLib(LibIdForm libIdForm);
 
     /**
      * 通过题目id集合获取题目详细信息
@@ -36,11 +43,18 @@ public interface AskingMapper {
     List<AskingQuestionDto> getQuestionsInfo(List<String> qids);
 
     /**
+     * 获取该题目详情
+     * @param qid
+     * @return
+     */
+    AskingQuestionDto getQuestionInfo(String qid);
+
+    /**
      * 通过id
-     * @param qids 题目id集合
+     * @param qid 题目id
      * @return 答案集合
      */
-    String getAnswerById(String qids);
+    String getAnswerById(String qid);
 
     /**
      * 插入答题记录
@@ -75,12 +89,20 @@ public interface AskingMapper {
      */
     List<QidAndWrongTimeDto> getQidAndWrongTime(String userId);
 
+
     /**
-     * 查询每日做题时间以及总做题量
+     * 获取每日做题时间
      * @param userId
      * @return
      */
-    DailyTimeAndTotalAskNumDto getDailyTimeAndTotalAskNum(String userId);
+    Integer getDailyTime(String userId);
+
+    /**
+     * 获取总做题量
+     * @param userId
+     * @return
+     */
+    Integer getTotalAskNum(String userId);
 
     /**
      * 更新每日做题时间
@@ -103,5 +125,48 @@ public interface AskingMapper {
      */
     void updateWrongTime(String wrongTimes,String qid,String userId);
 
+    /**
+     * 获取闯关数
+     * @param userId
+     * @return
+     */
+    String getStageNum(String userId);
 
+    /**
+     * 更新闯关数
+     * @param userId
+     * @return
+     */
+    void updateStageNum(String userId,String stageNum);
+
+    /**
+     * 插入闯关数
+     * @param userId
+     * @return
+     */
+    void insertStageNum(String userId);
+
+    /**
+     * 获取题目解析
+     * @param qid
+     * @return
+     */
+    AnswAndAnalyDto getAnswerAndAnalysis(String qid);
+
+
+    /**
+     * 查找时间段内的答题记录结果
+     * @param stopTime 结束时间
+     * @param startTime 开始时间
+     * @param userId 用户id
+     * @return
+     */
+    List<AnswerRecordDto> getAnswerRecord(long startTime, long stopTime, String userId);
+
+    /**
+     * 获取答题记录详情
+     * @param answerId
+     * @return
+     */
+    List<AnswerRecordInfoDto> getAnswRecoInfo(String answerId);
 }
