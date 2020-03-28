@@ -19,16 +19,14 @@ mybatis:
   type-aliases-package: com.yunding.answer.entity
   mapper-locations: classpath:mapper/*Mapper.xml
   configuration:
-    # 自动下划线转换驼峰
+
     map-underscore-to-camel-case: true
 
 server:
-  port: 8080
+  port: 8081
 
   pagehelper:
     helperDialect: mysql
     reasonable: true
     supportMethodsArguments: true
     params: count=countSql
-
-

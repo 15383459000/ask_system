@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yunding.answer.mapper.CollectionMapper">
+
+    <!--通过id找到所有的收藏的题-->
+    <select id="findCollectionById" resultType="com.yunding.answer.entity.QuestionInfo">
+        SELECT *
+        FROM ask_system.questions_info
+        WHERE question_id =
+        any(SELECT a.question_id
+            from (select *
+                from ask_system.question_collection
+                WHERE user_id = #{userId}
+            order by createAt desc limit #{last},#{next}) as a)
+    </select>
+    <!--删除收藏的题-->
+    <delete id="deleteCollection">
+        delete
+        from ask_system.question_collection
+        where user_id = #{userId} and question_Id = #{questionId}
+    </delete>
+    <!--搜索收藏的题-->
+    <select id="searchCollection" resultType="com.yunding.answer.entity.QuestionInfo">
+        SELECT *
+        FROM ask_system.questions_info
+        WHERE (question_id =
+        ANY(SELECT question_id
+            FROM ask_system.question_collection
+            WHERE user_id = #{userId}))
+        AND (question_content LIKE '%${key}%' OR checkA LIKE '%${key}%' OR checkB LIKE '%${key}%'
+        OR checkC LIKE '%${key}%' OR checkD LIKE '%${key}%' OR course_type LIKE '%${key}%')
+    </select>
+</mapper>

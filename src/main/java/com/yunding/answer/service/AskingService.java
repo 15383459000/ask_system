@@ -1,10 +1,7 @@
 package com.yunding.answer.service;
 
 import com.yunding.answer.dto.*;
-import com.yunding.answer.form.AnswerForm;
-import com.yunding.answer.form.LibIdForm;
-import com.yunding.answer.form.RecordByTimeForm;
-import com.yunding.answer.form.StageAnswerForm;
+import com.yunding.answer.form.*;
 
 import java.util.List;
 
@@ -32,7 +29,7 @@ public interface AskingService {
      * @param answerForm
      * @return 答题记录id
      */
-    String judgePaper(AnswerForm answerForm,String userId);
+    String judgePaper(AnswerForm answerForm, String userId);
 
     /**
      * 开始闯关
@@ -46,7 +43,7 @@ public interface AskingService {
      * @param stageAnswerForm
      * @return
      */
-    boolean judgeStage(StageAnswerForm stageAnswerForm,String userId);
+    boolean judgeStage(StageAnswerForm stageAnswerForm, String userId);
 
     /**
      * 获取答案和解析
@@ -68,4 +65,25 @@ public interface AskingService {
      * @return
      */
     List<AnswerRecordInfoDto> getAnswRecorInfo(String answerId);
+
+    /**
+     * 获取题目 - 快速刷题（选择填空）
+     * @param practiceForm
+     */
+    List<QuickPracticeDto> getQuickPracticeList(PracticeForm practiceForm);
+
+    /**
+     * 获取题目 - 快速刷题（问答）
+     * @param practiceForm
+     */
+    List<AskPracticeDto> getAskPracticeList(PracticeForm practiceForm);
+
+    /**
+     * 练习题 - 判卷
+     * @param checkAnswersForm
+     * @param userId
+     * @return
+     */
+    List<CheckAnswersDto> checkAnswers(CheckAnswersForm checkAnswersForm, String userId);
+
 }

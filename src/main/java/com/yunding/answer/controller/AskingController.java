@@ -130,4 +130,41 @@ public class AskingController extends BaseController<UserInfoDto> {
         return ResultWrapper.successWithData(askingService.getAnswRecorInfo(answerId));
     }
 
+    /**
+     * 获取题目 - 快速刷题（选择填空）
+     * @param practiceForm
+     * @return
+     */
+    @ApiOperation(value = "获取题目 - 快速刷题（选择填空）")
+    @PostMapping("/practice/quick")
+    public ResultWrapper postQuickPractice(@RequestBody PracticeForm practiceForm) {
+        return ResultWrapper.successWithData(askingService.getQuickPracticeList(practiceForm));
+    }
+
+    /**
+     * 获取题目 - 快速刷题（问答）
+     * @param practiceForm
+     * @return
+     */
+    @ApiOperation(value = "获取题目 - 快速刷题（问答）")
+    @PostMapping("/practice/ask")
+    public ResultWrapper postAskPractice(@RequestBody PracticeForm practiceForm) {
+        return ResultWrapper.successWithData(askingService.getAskPracticeList(practiceForm));
+    }
+
+    /**
+     * 练习题 - 判卷
+     * @param checkAnswersForm
+     * @return
+     */
+    @ApiOperation(value = "练习题 - 判卷")
+    @PostMapping("/check_answers")
+    public ResultWrapper checkAnswers(@RequestBody CheckAnswersForm checkAnswersForm) {
+        try {
+            return ResultWrapper.successWithData(askingService.checkAnswers(checkAnswersForm,getCurrentUserInfo().getUserId()));
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResultWrapper.failure(e.toString());
+        }
+    }
 }

@@ -27,13 +27,13 @@
         select question_id,type_info,question_content,checkA,checkB,checkC,checkD,tag_info
         from questions_info,question_type,question_tag
         where questions_info.question_tag_id = question_tag.question_tag_id
-              and questions_info.question_type_id = question_type.question_type_id
-              and (
-              <foreach collection="list" item="item" index="index" separator=" or ">
-                  question_id = #{item}
-              </foreach>
-              )
-              order by questions_info.question_type_id
+        and questions_info.question_type_id = question_type.question_type_id
+        and (
+        <foreach collection="list" item="item" index="index" separator=" or ">
+            question_id = #{item}
+        </foreach>
+        )
+        order by questions_info.question_type_id
     </select>
 
     <!--通过题目id获取题目信息-->
@@ -71,10 +71,10 @@
     <!--插入答题记录详情-->
     <insert id="insertAskingRecordInfo" >
         insert into answer_record_info(answer_id, question_id, is_true, user_answer)
-                    value
-                    <foreach collection="answerRecordForms" item="item" index="index" separator=",">
-                        (#{param2},#{item.questionId},#{item.isTrue},#{item.userAnswer})
-                    </foreach>
+        value
+        <foreach collection="answerRecordForms" item="item" index="index" separator=",">
+            (#{param2},#{item.questionId},#{item.isTrue},#{item.userAnswer})
+        </foreach>
     </insert>
 
     <!--查找错题集中的题目id和错误次数-->
@@ -127,7 +127,7 @@
 
     <!--更新闯关数-->
     <update id="updateStageNum" parameterType="string">
-        update stage_record set stage_num = (#{param2}+1) 
+        update stage_record set stage_num = (#{param2}+1)
         where user_id = #{param1}
     </update>
 

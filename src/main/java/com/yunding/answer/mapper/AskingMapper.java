@@ -5,8 +5,13 @@ import com.yunding.answer.form.AnswerRecordForm;
 import com.yunding.answer.form.AnswerRecordInfoForm;
 import com.yunding.answer.form.LibIdForm;
 import com.yunding.answer.form.WrongQuestionForm;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -73,7 +78,7 @@ public interface AskingMapper {
      * @param answerRecordForms
      *
      */
-    void insertAskingRecordInfo(List<AnswerRecordInfoForm> answerRecordForms,String newRecord);
+    void insertAskingRecordInfo(List<AnswerRecordInfoForm> answerRecordForms, String newRecord);
 
     /**
      * 答题记录插入错题集
@@ -108,14 +113,14 @@ public interface AskingMapper {
      * 更新每日做题时间
      * @param
      */
-    void updateDailyTime(String userId,String dailyTime);
+    void updateDailyTime(String userId, String dailyTime);
 
     /**
      * 更新总做题时间
      * @param userId
      * @param totalAskNum
      */
-    void updateTotalAskNum(String userId,String totalAskNum);
+    void updateTotalAskNum(String userId, String totalAskNum);
 
     /**
      * 更行错误次数
@@ -123,7 +128,7 @@ public interface AskingMapper {
      * @param qid
      * @param userId
      */
-    void updateWrongTime(String wrongTimes,String qid,String userId);
+    void updateWrongTime(String wrongTimes, String qid, String userId);
 
     /**
      * 获取闯关数
@@ -137,7 +142,7 @@ public interface AskingMapper {
      * @param userId
      * @return
      */
-    void updateStageNum(String userId,String stageNum);
+    void updateStageNum(String userId, String stageNum);
 
     /**
      * 插入闯关数
@@ -169,4 +174,69 @@ public interface AskingMapper {
      * @return
      */
     List<AnswerRecordInfoDto> getAnswRecoInfo(String answerId);
+
+    /**
+     * @author HaoJun
+     * @create 2020-03
+     */
+
+    /**
+     * 获取快速答题题目（选择填空）
+     * @param libraryId
+     * @return
+     */
+    @Select("SELECT questions_info.question_id, question_type_id, question_content, " +
+            "checkA, checkB, checkC, checkD, question_tag_id " +
+            "FROM questions_info, question_form_library " +
+            "WHERE question_form_library.library_id = #{libraryId} " +
+            "AND question_form_library.question_id = questions_info.question_id " +
+            "AND (question_type_id = 1 OR question_type_id = 2 OR question_type_id = 3) " +
+            ";")
+    List<QuickPracticeDto> selectQuickPracticeList(@Param("libraryId") int libraryId);
+
+    /**
+     * 获取题目 - 快速刷题（问答）
+     * @param LibraryId
+     * @return
+     */
+    @Select("SELECT questions_info.question_id, question_type_id, question_content, question_tag_id " +
+            "FROM questions_info, question_form_library " +
+            "WHERE question_form_library.library_id = #{libraryId} " +
+            "AND question_form_library.question_id = questions_info.question_id " +
+            "AND question_type_id = 4 " +
+            ";")
+    List<AskPracticeDto> selectAskPracticeList(@Param("libraryId") int LibraryId);
+
+    /**
+     * 根据问题id获取答案
+     * @param questionId
+     * @return
+     */
+    @Select("SELECT answer FROM questions_info WHERE question_id = #{questionId};")
+    String selectAnswerById(@Param("questionId") String questionId);
+
+    /**
+     * 增加做题量
+     * @param userId
+     */
+    @Update("UPDATE user_info SET total_exercises_quantity = total_exercises_quantity + 10 WHERE user_id = #{userId};")
+    void updateExercisesQuantity(@Param("userId") String userId);
+
+    /**
+     * 查询时间戳更新时间
+     * @param userId
+     * @return
+     */
+    @Select("SELECT updateAt FROM learning_plan WHERE user_id = #{userId};")
+    Date selectLearningDaysUpdateTime(@Param("userId") String userId);
+
+    /**
+     * 增加累计学习天数
+     * @param userId
+     */
+    @Update("UPDATE learning_plan SET total_learning_time = total_learning_time + 1 WHERE user_id = #{userId};")
+    void updateLearningDays(@Param("userId") String userId);
+
+
+
 }

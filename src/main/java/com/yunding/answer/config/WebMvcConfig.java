@@ -31,7 +31,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/file/image",
                         "/message/**",
                         "/user/password/login",
-                        "/asking/questionLib"
+//                        "/asking/**",
+//                        "/user/**",
+                        "/asking/questionLib",
+                        "/practice/quick",
+                        "/practice/ask",
+                        "/login/**",
+                        "/register",
+                        "/integral/goods",
+                        "/integral/title",
+                        "/integral/goods/info"
                 );
     }
 

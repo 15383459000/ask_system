@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -102,8 +105,8 @@ public class AskingServiceImpl implements AskingService {
             String questionAnswer = askingMapper.getAnswerById(answerForm.getQuestionIdList().get(i));
             //判断用户答案是否正确
             if (questionAnswer==null
-                   ||questionAnswer.equals("")
-                   ||questionAnswer.equals(answerForm.getUserAnswerList().get(i))){
+                    ||questionAnswer.equals("")
+                    ||questionAnswer.equals(answerForm.getUserAnswerList().get(i))){
                 isTrue = true;
                 numOfRight++;
             } else {
@@ -205,5 +208,86 @@ public class AskingServiceImpl implements AskingService {
         return askingMapper.getAnswRecoInfo(answerId);
     }
 
+    /**
+     * 获取题目 - 快速刷题（选择填空）
+     * @param practiceForm
+     * @return
+     */
+    @Override
+    public List<QuickPracticeDto> getQuickPracticeList(PracticeForm practiceForm) {
+        int libraryId = practiceForm.getLibraryId();
+        return askingMapper.selectQuickPracticeList(libraryId);
+    }
+
+    /**
+     * v获取题目 - 快速刷题（问答）
+     * @param practiceForm
+     * @return
+     */
+    @Override
+    public List<AskPracticeDto> getAskPracticeList(PracticeForm practiceForm) {
+        int libraryId = practiceForm.getLibraryId();
+        return askingMapper.selectAskPracticeList(libraryId);
+    }
+
+    /**
+     * 练习题 - 判卷
+     * @param checkAnswersForm
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<CheckAnswersDto> checkAnswers(CheckAnswersForm checkAnswersForm, String userId){
+
+        // 创建用于向前端返回信息的 list 列表
+        List<CheckAnswersDto> list = new ArrayList<>();
+
+        // 检验答案是否正确
+        for (int i = 0; i < 10; i++) {
+            CheckAnswersDto dto = new CheckAnswersDto();
+            // 获取题目 id
+            String questionId = checkAnswersForm.getQuestionIdList().get(i);
+            // 通过题目id获取答案
+            String answer = askingMapper.selectAnswerById(questionId);
+            // 获取用户答案
+            String userAnswer = checkAnswersForm.getUserAnswerList().get(i);
+            // 判断用户答案是否正确
+            if (answer.equals(userAnswer)) {
+                dto.setIsRight("1");
+            } else {
+                dto.setIsRight("0");
+            }
+            // 设置返回值
+            dto.setQuestionId(questionId);
+            System.out.println(dto);
+            // 补充返回列表
+            list.add(dto);
+        }
+
+        // 增加做题量
+        try {
+            askingMapper.updateExercisesQuantity(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 增加学习天数
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String date = df.format(new Date());
+        Date updateDate = askingMapper.selectLearningDaysUpdateTime(userId);
+        String updateTime = df.format(updateDate);
+        if (!date.equals(updateTime)) {
+            try {
+                askingMapper.updateLearningDays(userId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // 返回信息
+        System.out.println(list);
+        return list;
+
+    }
 
 }

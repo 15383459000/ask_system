@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yunding.answer.mapper.WrongMapper">
+    <!--通过用户id得到所有错题-->
+    <select id="showQuestionInfo" resultType="com.yunding.answer.entity.QuestionInfo">
+        select *
+        from ask_system.wrong_questions_record
+        where user_id=#{userId}
+    </select>
+    <!--通过类型得到这个类型的错题 查问题表-->
+    <select id="showQuestionByType" resultType="com.yunding.answer.entity.QuestionInfo">
+        select *
+        from ask_system.questions_info
+        where question_id =
+        any(select a.question_id
+            from (select *
+                from  ask_system.wrong_questions_record
+                where user_id = #{userId} and course_type = #{type}
+                order by createAt desc limit #{last},#{next} ) as a)
+    </select>
+    <!--通过类型得到这个类型的错题 查错题表-->
+    <select id="showWrongByType" resultType="com.yunding.answer.entity.WrongQuestion">
+        select *
+        from ask_system.wrong_questions_record
+        where (user_id = #{userId} and course_type = #{type})
+        order by createAt desc limit #{last},#{next}
+    </select>
+<!--
+        -->
+    <!--通过用户id和题目id删除错题-->
+    <delete id="deleteWrongQuestion">
+        delete
+        from ask_system.wrong_questions_record
+        where user_id = #{userId} and question_Id =#{questionId}
+    </delete>
+</mapper>
